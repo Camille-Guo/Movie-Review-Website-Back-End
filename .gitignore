@@ -1,0 +1,14 @@
+# Ignore Mac system files
+.DS_store
+
+# Ignore VSCode store file
+.vscode
+
+# Ignore node_modules folder
+node_modules
+
+# ignore stage file
+package-lock.json
+
+# Ignore files related to API keys
+.env
