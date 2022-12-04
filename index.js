@@ -5,10 +5,12 @@ const saltRounds = 10;
 require('dotenv').config();
 const mongoose = require("mongoose");
 const userModel = require("./models");
+//rucheng local database
 mongoose.connect("mongodb+srv://rrc:" + process.env.MONGODB_PWD + "@cluster0.rqltzmh.mongodb.net/monvie?retryWrites=true&w=majority", {
     useNewUrlParser: true,
     useUnifiedTopology: true
 });
+
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error: "));
 db.once("open", function () {
@@ -28,40 +30,47 @@ app.use(bodyParser.json());
 
 
 //register
-app.post('/register',async(request,response) =>{
+app.post('/register', async (request, response) => {
     console.log(request.body);
     const id = request.body.id;
     const username = request.body.username;
     const email = request.body.email;
-    const password = request.body.password;
+    const password = request.body.password; console.info(validator.isStrongPassword(password));
+    const comfirmpassword = request.body.comfirmpassword;
     try {
-        if (username && 
-            validator.isAlphanumeric(username) &&
-            email &&
-            isEmail(email) &&
-            password &&
-            validator.isStrongPassword(password)) {
-            //check if email is exist
-            const user = await userModel.findOne({email:email})    
-            if(user){
-                response.send({success:false});
+        if (username && validator.isAlphanumeric(username) &&
+            email && isEmail(email) &&
+            password && validator.isStrongPassword(password) &&
+            comfirmpassword
+        ) {
+            //check if password and comfirm password are same
+            if (password !== comfirmpassword) {
+                response.send({ success:false, error: 'Password and confirmpassword must be same' });
                 return;
-            }else{
-                hashedPassword = await bcrypt.hash(password,saltRounds);
+            }
+            //check if email is exist
+            const user = await userModel.findOne({ email: email }); console.info(user);
+            if (user) {
+                response.send({ success: false, error: "Email is exist" });
+                return;
+            } else {
+                hashedPassword = await bcrypt.hash(password, saltRounds);
                 const userToSave = {
-                    username : username,
-                    email:email,
+                    username: username,
+                    email: email,
                     password: hashedPassword,
                 };
                 await userModel.create(userToSave);
-                response.send({success: true});
+                response.send({ success: true });
                 return;
             }
-        } 
+        } else {
+            response.send({success:false, error:'All fields is required'})
+        }
     } catch (error) {
         console.log(error.message);
     }
-    response.send({success:false});
+    response.send({ success: false });
 
 })
 
