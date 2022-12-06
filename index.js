@@ -70,17 +70,17 @@ app.post("/register", async (request, response) => {
 
 //add review
 app.post("/addreview", async (request, response) => {
-  console.log(request.body);
+  // console.log(request.body);
   const id = request.body.id;
   const movieId = request.body.movieId;
   const userId = request.body.userId;
   const username = request.body.username;
   const updateDate = request.body.updateDate;
   const rate = request.body.rate;
-  // const contentText = "1234";
-  const contentText = request.body.content.contentText;
-  console.log(id, movieId, userId, username, updateDate, rate, contentText);
-  console.log("==");
+  const content = request.body.content;
+  // const contentText = request.body.content.contentText;
+  // console.log(id, movieId, userId, username, updateDate, rate, contentText);
+  // console.log("==");
   try {
     const reviewToSave = {
       movieId: movieId,
@@ -88,7 +88,7 @@ app.post("/addreview", async (request, response) => {
       username: username,
       updateDate: updateDate,
       rate: rate,
-      content: [{ contentText: contentText }],
+      content: content,
     };
     console.log(reviewToSave);
     await CommentRecordModel.create(reviewToSave);

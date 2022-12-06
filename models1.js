@@ -24,16 +24,20 @@ const CommentRecordSchema = new mongoose.Schema({
     default: 0,
     required: false,
   },
-  content: [
-    {
-      contentId: {
-        type: String,
-      },
-      contentText: {
-        type: String,
-      },
-    },
-  ],
+  // content: [
+  //   {
+  //     contentId: {
+  //       type: String,
+  //     },
+  //     contentText: {
+  //       type: String,
+  //     },
+  //   },
+  // ],
+  content: {
+    type: String,
+    required: false,
+  },
 });
 const CommentRecord = mongoose.model("CommentRecord", CommentRecordSchema);
 module.exports = CommentRecord;
