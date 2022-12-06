@@ -10,7 +10,6 @@ mongoose.connect(
     process.env.MONGODB_PWD +
     "@cluster0.xy96opn.mongodb.net/myFirstDb?retryWrites=true&w=majority",
   { useNewUrlParser: true, useUnifiedTopology: true }
-);
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error: "));
 db.once("open", function () {
@@ -29,43 +28,40 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 //register
-app.post("/register", async (request, response) => {
-  console.log(request.body);
-  const id = request.body.id;
-  const username = request.body.username;
-  const email = request.body.email;
-  const password = request.body.password;
-  try {
-    if (
-      username &&
-      validator.isAlphanumeric(username) &&
-      email &&
-      isEmail(email) &&
-      password &&
-      validator.isStrongPassword(password)
-    ) {
-      //check if email is exist
-      const user = await userModel.findOne({ email: email });
-      if (user) {
-        response.send({ success: false });
-        return;
-      } else {
-        hashedPassword = await bcrypt.hash(password, saltRounds);
-        const userToSave = {
-          username: username,
-          email: email,
-          password: hashedPassword,
-        };
-        await userModel.create(userToSave);
-        response.send({ success: true });
-        return;
-      }
+app.post('/register',async(request,response) =>{
+    console.log(request.body);
+    const id = request.body.id;
+    const username = request.body.username;
+    const email = request.body.email;
+    const password = request.body.password;
+    try {
+        if (username && 
+            validator.isAlphanumeric(username) &&
+            email &&
+            isEmail(email) &&
+            password &&
+            validator.isStrongPassword(password)) {
+            //check if email is exist
+            const user = await userModel.findOne({email:email})    
+            if(user){
+                response.send({success:false});
+                return;
+            }else{
+                hashedPassword = await bcrypt.hash(password,saltRounds);
+                const userToSave = {
+                    username : username,
+                    email:email,
+                    password: hashedPassword,
+                };
+                await userModel.create(userToSave);
+                response.send({success: true});
+                return;
+            }
+        } 
+    } catch (error) {
+        console.log(error.message);
     }
-  } catch (error) {
-    console.log(error.message);
-  }
-  response.send({ success: false });
-});
+    response.send({success:false});
 
 app.listen(port, () =>
   console.log(`Hello world app listening on port ${port}!`)
