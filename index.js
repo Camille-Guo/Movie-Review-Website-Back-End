@@ -1,113 +1,137 @@
-const validator = require('validator');
-const bcrypt = require('bcrypt');
+const validator = require("validator");
+const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
-require('dotenv').config();
+require("dotenv").config();
 const mongoose = require("mongoose");
 const userModel = require("./models");
 
 //rucheng local database
-mongoose.connect("mongodb+srv://rrc:" + process.env.MONGODB_PWD + "@cluster0.rqltzmh.mongodb.net/monvie?retryWrites=true&w=majority", {
+mongoose.connect(
+  "mongodb+srv://rrc:" +
+    process.env.MONGODB_PWD +
+    "@cluster0.rqltzmh.mongodb.net/monvie?retryWrites=true&w=majority",
+  {
     useNewUrlParser: true,
-    useUnifiedTopology: true
-});
+    useUnifiedTopology: true,
+  }
+);
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error: "));
 db.once("open", function () {
-    console.log("Connected successfully");
+  console.log("Connected successfully");
 });
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors'); //cross-orign resource sharing
-const { default: isEmail } = require('validator/lib/isEmail');
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors"); //cross-orign resource sharing
+const { default: isEmail } = require("validator/lib/isEmail");
 const app = express();
 const port = 3001; // Must be different than the port of the React app
 app.use(cors()); // https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
-app.use(express.json()); // Allows express to read a request body
+app.use(express.json()); // Allows express to read a req body
 // Configuring body parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-
 //register handle
-app.post('/register', async (request, response) => {
-    console.log(request.body);
-    const id = request.body.id;
-    const username = request.body.username;
-    const email = request.body.email;
-    const password = request.body.password;
-    // console.info(validator.isStrongPassword(password));
-    const comfirmpassword = request.body.comfirmpassword;
-    try {
-        if (username && validator.isAlphanumeric(username) &&
-            email && isEmail(email) &&
-            password && validator.isStrongPassword(password) &&
-            comfirmpassword
-        ) {
-            //check if password and comfirm password are same
-            if (password !== comfirmpassword) {
-                response.send({ success: false, pwdErrMsg: 'Password and confirmpassword must be same' });
-                return;
-            }
-            //check if email is exist
-            const user = await userModel.findOne({ email: email }); console.info(user);
-            if (user) {
-                response.send({ success: false, emailErrMsg: "Email is exist" });
-                return;
-            } else {
-                hashedPassword = await bcrypt.hash(password, saltRounds);
-                const userToSave = {
-                    username: username,
-                    email: email,
-                    password: hashedPassword,
-                    avatar: null,
-                };
-                await userModel.create(userToSave);
-                response.send({ success: true });
-                return;
-            }
-        } else {
-            if (!username || !email || !password || !comfirmpassword) {
-                response.send({ success: false, errorMsg:"All fields is require"})
-                return;
-            }
-        }
-    } catch (error) {
-        console.log("error");
-    }
-    response.send({ success: false });
+app.post("/register", async (req, res) => {
+  const { username, email, password, comfirmPassword } = req.body;
 
+  let status = "failed",
+    message = "";
+
+  if (!username) {
+    message = "Please fill username";
+  }
+
+  if (validator.isAlphanumeric(username)) {
+    message = "aaaa";
+  }
+
+  if (!email) {
+    message = "Please fill email";
+  }
+
+  if (!isEmail(email)) {
+    message = "Please fill with valid email";
+  }
+
+  if (!password) {
+    message = "Please fill password";
+  }
+
+  if (!validator.isStrongPassword(password)) {
+    message = "Your password is too weak";
+  }
+
+  if (password !== comfirmPassword) {
+    message = "Password is not the same";
+  }
+
+  const userRes = await userModel.findOne({ email });
+
+  if (!userRes) {
+    message = "Email is exist";
+  }
+
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+  const userToSave = {
+    username,
+    email,
+    password: hashedPassword,
+    avatar: null,
+  };
+
+  let newUserModel = null;
+
+  try {
+    newUserModel = await userModel.create(userToSave);
+
+    if (!newUserModel) {
+      message = "create user failed";
+    }
+  } catch (e) {
+    message = e.message;
+  }
+
+  status = "succeeded";
+  data = newUserModel;
+
+  res.send(status === "failed" ? { status, message } : { status, data });
 });
 
 //login handle
-app.post("/login", async (request, response)=>{
-    const email = request.body.email;
-    const password = request.body.password;
-    try {
-        if (email && password) {
-            // Check to see if the user already exists. If not, then create it.
-            const user = await userModel.findOne({ email: email });
-            if (!user) {
-                console.log("Invalid login - email " + email + " doesn'texist.");
-                response.send({ success: false });
-                return;
-            } else {
-                const isSame = await bcrypt.compare(password, user.password);
-                if (isSame) {
-                    console.log("Successful login");
-                    response.send({ success: true });
-                    return;
-                }else{
-                    response.send({ success: false, loginErr:'Wrong password' })
-                    return;
-                }
-            }
+app.post("/login", async (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  try {
+    if (email && password) {
+      // Check to see if the user already exists. If not, then create it.
+      const user = await userModel.findOne({ email: email });
+      if (!user) {
+        console.log("Invalid login - email " + email + " doesn'texist.");
+        res.send({ success: false });
+        return;
+      } else {
+        const isSame = await bcrypt.compare(password, user.password);
+        if (isSame) {
+          console.log("Successful login");
+          res.send({ success: true, user: user });
+          return;
+        } else {
+          res.send({ success: false, loginErr: "Wrong password" });
+          return;
         }
-    } catch (error) {
-        console.log(error.message);
+      }
     }
-    response.send({ success: false });
+  } catch (error) {
+    console.log(error.message);
+  }
+  res.send({ success: false });
 });
 
-app.listen(port, () => console.log(`Hello world app listening on port ${port}!`))
+app.listen(port, () =>
+  console.log(`Hello world app listening on port ${port}!`)
+);
