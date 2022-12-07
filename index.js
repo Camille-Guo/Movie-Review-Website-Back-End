@@ -1,11 +1,13 @@
+require('dotenv').config();
+
 const validator = require('validator');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
-
-require('dotenv').config();
 const mongoose = require("mongoose");
-const userModel = require("./models");
-mongoose.connect("mongodb+srv://rrc:" + process.env.MONGODB_PWD + "@cluster0.rqltzmh.mongodb.net/monvie?retryWrites=true&w=majority", {
+const userModel = require("./userModels");
+
+mongoose.connect( "mongodb+srv://mongouser:" + process.env.MONGODB_PWD +"@cluster0.z0czpjb.mongodb.net/myFirstDB?retryWrites=true&w=majority", 
+{
     useNewUrlParser: true,
     useUnifiedTopology: true
 });
@@ -14,7 +16,10 @@ db.on("error", console.error.bind(console, "connection error: "));
 db.once("open", function () {
     console.log("Connected successfully");
 });
+
+const userRouters = require("./routes/userRouters");
 const express = require('express');
+const notes = require('./data/notes');
 const bodyParser = require('body-parser');
 const cors = require('cors'); //cross-orign resource sharing
 const { default: isEmail } = require('validator/lib/isEmail');
@@ -26,6 +31,12 @@ app.use(express.json()); // Allows express to read a request body
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.get("/notes", async (req, res)=> {
+    res.json(notes);
+});
+
+/* An API get request to /users to get all user */
+app.get("/users", userRouters);
 
 //register
 app.post('/register',async(request,response) =>{
