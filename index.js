@@ -103,7 +103,7 @@ app.post("/addreview", async (request, response) => {
 });
 
 /* get review using userId 
-/users/get */
+/commandreviews/get */
 app.post("/commandreviews/get", async (req, res) => {
   const userId = req.body.userId;
   // console.log(userId);
@@ -141,7 +141,7 @@ app.put("/commandreviews", async (req, res) => {
   const movieId = req.body.movieId;
   const movieName = req.body.movieName;
   const userId = req.body.userId;
-  const userName = req.body.userName;
+  const username = req.body.username;
   const updateDate = req.body.updateDate;
   const rate = req.body.rate;
   const content = req.body.content;
@@ -150,7 +150,7 @@ app.put("/commandreviews", async (req, res) => {
     movieId: movieId,
     movieName: movieName,
     userId: userId,
-    userName: userName,
+    username: username,
     updateDate: updateDate,
     rate: rate,
     content: content,
