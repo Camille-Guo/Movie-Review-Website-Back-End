@@ -73,6 +73,7 @@ app.post("/addreview", async (request, response) => {
   // console.log(request.body);
   const id = request.body.id;
   const movieId = request.body.movieId;
+  const movieName = request.body.movieName;
   const userId = request.body.userId;
   const username = request.body.username;
   const updateDate = request.body.updateDate;
@@ -84,13 +85,14 @@ app.post("/addreview", async (request, response) => {
   try {
     const reviewToSave = {
       movieId: movieId,
+      movieName: movieName,
       userId: userId,
       username: username,
       updateDate: updateDate,
       rate: rate,
       content: content,
     };
-    console.log(reviewToSave);
+    // console.log(reviewToSave);
     await CommentRecordModel.create(reviewToSave);
     response.send({ success: true });
     return;
@@ -100,14 +102,71 @@ app.post("/addreview", async (request, response) => {
   response.send({ success: false });
 });
 
-//users/get
-// app.post("/CommentRecord/get", async (req, res) => {
-//   const username = req.body.username;
-//   const review = await userModel.findOne({
-//     username: username,
-//   });
-//   res.send(user);
-// });
+/* get review using userId 
+/users/get */
+app.post("/commandreviews/get", async (req, res) => {
+  const userId = req.body.userId;
+  // console.log(userId);
+  const record = await CommentRecordModel.find({
+    userId: userId,
+  });
+  res.send(record);
+  // console.log(record);
+});
+
+/* delete review using recordId  */
+app.delete("/commandreviews/:recordId", async (req, res) => {
+  const recordId = req.params.recordId;
+  const results = await CommentRecordModel.deleteOne({ _Id: recordId });
+  // console.log(results);
+  res.send(results);
+});
+
+/* get review using URL path parameters 
+to /commandreviews/:recordId */
+app.get("/commandreviews/:recordId", async (req, res) => {
+  const recordId = req.params.recordId;
+  // console.log(recordId);
+  const results = await CommentRecordModel.findOne({
+    _id: recordId,
+  });
+  // console.log(results);
+  res.send(results);
+});
+
+/* update review using body /users. 
+Replaces the entire user. */
+app.put("/commandreviews", async (req, res) => {
+  const recordId = req.body.recordId;
+  const movieId = req.body.movieId;
+  const movieName = req.body.movieName;
+  const userId = req.body.userId;
+  const userName = req.body.userName;
+  const updateDate = req.body.updateDate;
+  const rate = req.body.rate;
+  const content = req.body.content;
+  const review = {
+    _id: recordId,
+    movieId: movieId,
+    movieName: movieName,
+    userId: userId,
+    userName: userName,
+    updateDate: updateDate,
+    rate: rate,
+    content: content,
+  };
+  console.log(review);
+  const results = await CommentRecordModel.replaceOne(
+    {
+      _id: recordId,
+    },
+    review
+  );
+  // const res = await Person.replaceOne({ _id: 24601 }, { name: 'Jean Valjean' });
+  console.log("matched: " + results.matchedCount);
+  console.log("modified: " + results.modifiedCount);
+  res.send(results);
+});
 
 app.listen(port, () =>
   console.log(`Hello world app listening on port ${port}!`)

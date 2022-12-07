@@ -6,6 +6,11 @@ const CommentRecordSchema = new mongoose.Schema({
     required: true,
     unique: false,
   },
+  movieName: {
+    type: String,
+    required: true,
+    unique: false,
+  },
   userId: {
     type: String,
     required: true,
@@ -17,7 +22,6 @@ const CommentRecordSchema = new mongoose.Schema({
   },
   updateDate: {
     type: Date,
-    default: Date.now,
   },
   rate: {
     type: Number,
