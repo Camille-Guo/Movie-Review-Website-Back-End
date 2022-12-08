@@ -1,23 +1,24 @@
-const validator = require('validator');
-const bcrypt = require('bcrypt');
+const validator = require("validator");
+const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
-require('dotenv').config();
+require("dotenv").config();
 const mongoose = require("mongoose");
 const userModel = require("./models");
-mongoose.connect("mongodb+srv://rrc:" + process.env.MONGODB_PWD + "@cluster0.rqltzmh.mongodb.net/monvie?retryWrites=true&w=majority", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-});
+const CommentRecordModel = require("./models1");
+mongoose.connect(
+  "mongodb+srv://mongouser:" + process.env.MONGODB_PWD +"@cluster0.z0czpjb.mongodb.net/myFirstDB?retryWrites=true&w=majority",
+  { useNewUrlParser: true, useUnifiedTopology: true }
+);
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error: "));
 db.once("open", function () {
   console.log("Connected successfully");
 });
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors'); //cross-orign resource sharing
-const { default: isEmail } = require('validator/lib/isEmail');
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors"); //cross-orign resource sharing
+const { default: isEmail } = require("validator/lib/isEmail");
 const app = express();
 const port = 3001; // Must be different than the port of the React app
 app.use(cors()); // https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
@@ -25,7 +26,6 @@ app.use(express.json()); // Allows express to read a request body
 // Configuring body parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
 
 //register
 app.post("/register", async (request, response) => {
@@ -99,6 +99,17 @@ app.post("/addreview", async (request, response) => {
   }
   response.send({ success: false });
 });
+/**Test for Get users */
+app.get("/users", async (req, res) => {
+  const users = await userModel.find();
+  res.send(users);
+  });
+/**Test for Get notes */
+  app.get("/notes", async (req, res) => {
+    const notes = await CommentRecordModel.find();
+    res.send(notes);
+    });
+
 
 /* get review using userId 
 /commandreviews/get */
