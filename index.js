@@ -7,11 +7,9 @@ const mongoose = require('mongoose');
 const userModel = require('./userModels');
 const CommentRecordModel = require("./models1");
 
-//rucheng local database
+//Xiaoming local database
 mongoose.connect(
-	'mongodb+srv://rrc:' +
-		process.env.MONGODB_PWD +
-		'@cluster0.rqltzmh.mongodb.net/monvie?retryWrites=true&w=majority',
+	"mongodb+srv://mongouser:" + process.env.MONGODB_PWD +"@cluster0.z0czpjb.mongodb.net/myFirstDB?retryWrites=true&w=majority",
 	{
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
@@ -346,6 +344,53 @@ app.put("/commandreviews", async (req, res) => {
   console.log("matched: " + results.matchedCount);
   console.log("modified: " + results.modifiedCount);
   res.send(results);
+});
+
+//update profile handle
+app.put('/user/change-profile', async (req, res) => {
+	const email = req.body.email;
+	const username = req.body.username;
+	
+	let message = '';
+	let status = 'failed';
+
+	if (!username) {
+		message = 'Please enter username';
+		res.send({ status, message });
+		return;
+	}
+
+	if (!validator.isAlphanumeric(username)) {
+		message = 'format of username is not correct';
+		res.send({ status, message });
+		return;
+	}
+
+
+	const user = {username: username, email: email};
+
+	const results = await userModel.replaceOne({ 
+		username: username }, user);
+
+	// const filter = { email };
+
+	let updateUserModel = null;
+
+	try {
+		updateUserModel = await userModel.findOneAndUpdate(filter, update, {
+			new: true,
+		});
+
+		if (!updateUserModel) {
+			message = 'update user failed';
+			res.send({ message });
+			return;
+		}
+	} catch (e) {
+		message = e.message;
+	}
+	data = updateUserModel;
+	res.send({ results });
 });
 
 app.listen(port, () =>
