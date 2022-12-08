@@ -47,7 +47,7 @@ app.post('/identity/register', async (req, res) => {
 		return;
 	}
 
-	if (validator.isAlphanumeric(username)) {
+	if (!validator.isAlphanumeric(username)) {
 		message = 'format of username is not correct';
 		res.send({ status, message });
 		return;
@@ -91,7 +91,7 @@ app.post('/identity/register', async (req, res) => {
 
 	const userRes = await userModel.findOne({ email });
 
-	if (!userRes) {
+	if (userRes) {
 		message = 'Email is exist';
 		res.send({ status, message });
 		return;
@@ -138,7 +138,7 @@ app.post('/identity/login', async (req, res) => {
 	}
 
 	if (!password) {
-		message = 'Please set your password';
+		message = 'Please enter your password';
 		res.send({ status, message });
 		return;
 	}
