@@ -12,3 +12,5 @@ package-lock.json
 
 # Ignore files related to API keys
 .env
+
+.prettierrc.json
