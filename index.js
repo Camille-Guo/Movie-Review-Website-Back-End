@@ -50,18 +50,6 @@ app.post('/identity/register', async (req, res) => {
 	let status = 'failed',
 		message = '';
 
-	if (!username) {
-		message = 'Please enter username';
-		res.send({ status, message });
-		return;
-	}
-
-	if (!validator.isAlphanumeric(username)) {
-		message = 'format of username is not correct';
-		res.send({ status, message });
-		return;
-	}
-
 	if (!email) {
 		message = 'Please enter your email';
 		res.send({ status, message });
@@ -70,6 +58,19 @@ app.post('/identity/register', async (req, res) => {
 
 	if (!isEmail(email)) {
 		message = 'Please enter with valid email';
+		res.send({ status, message });
+		return;
+	}
+
+
+	if (!username) {
+		message = 'Please enter username';
+		res.send({ status, message });
+		return;
+	}
+
+	if (!validator.isAlphanumeric(username)) {
+		message = 'format of username is not correct';
 		res.send({ status, message });
 		return;
 	}
