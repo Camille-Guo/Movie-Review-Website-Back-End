@@ -350,48 +350,19 @@ app.put("/commandreviews", async (req, res) => {
 app.put('/user/change-profile', async (req, res) => {
 	const email = req.body.email;
 	const username = req.body.username;
+	const user = {
+		email: email,
+		username: username, 
+	};
 	
-	let message = '';
-	let status = 'failed';
-
-	if (!username) {
-		message = 'Please enter username';
-		res.send({ status, message });
-		return;
-	}
-
-	if (!validator.isAlphanumeric(username)) {
-		message = 'format of username is not correct';
-		res.send({ status, message });
-		return;
-	}
-
-
-	const user = {username: username, email: email};
-
-	const results = await userModel.replaceOne({ 
-		username: username }, user);
-
-	// const filter = { email };
-
-	let updateUserModel = null;
-
-	try {
-		updateUserModel = await userModel.findOneAndUpdate(filter, update, {
-			new: true,
-		});
-
-		if (!updateUserModel) {
-			message = 'update user failed';
-			res.send({ message });
-			return;
-		}
-	} catch (e) {
-		message = e.message;
-	}
-	data = updateUserModel;
-	res.send({ results });
-});
+	const results = await userModel.replaceOne(
+		{email: email},
+	user
+	);
+	console.log("matched:" + results.matchedCount);
+	console.log("modified:" + results.modifiedCount);
+	res.send(results);
+	});
 
 app.listen(port, () =>
   console.log(`Hello world app listening on port ${port}!`)
