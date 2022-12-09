@@ -346,24 +346,26 @@ app.put("/commandreviews", async (req, res) => {
   res.send(results);
 });
 
-//update profile handle
-app.put('/user/change-profile', async (req, res) => {
-	const email = req.body.email;
+
+/* An API post request using body /users. 
+Replaces the entire user. */
+app.put("/users", async (req, res) => {
+	const password = req.body.password;
 	const username = req.body.username;
+	const email = req.body.email;
 	const user = {
-		email: email,
-		username: username, 
-	};
-	
-	const results = await userModel.replaceOne(
-		{email: email},
-	user
-	);
-	console.log("matched:" + results.matchedCount);
-	console.log("modified:" + results.modifiedCount);
+	username: username,
+	password: password,
+	email: email };
+	const results = await userModel.replaceOne({ 
+	username: username }, user);
+	console.log("matched: " + results.matchedCount);
+	console.log("modified: " + 
+	results.modifiedCount);
 	res.send(results);
 	});
-
+	
+	
 app.listen(port, () =>
   console.log(`Hello world app listening on port ${port}!`)
 );
