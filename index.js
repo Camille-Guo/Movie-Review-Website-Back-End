@@ -172,70 +172,6 @@ app.post('/identity/login', async (req, res) => {
 	res.send({ status, data });
 });
 
-//change password handle
-app.post('/user/change-password', async (req, res) => {
-	const { email, oldPassword, newPassword, confirmPassword } = req.body;
-	let message;
-	if (!oldPassword) {
-		message = 'Please enter your old password';
-		res.send({ message });
-		return;
-	}
-	if (!newPassword) {
-		message = 'Please set your new password';
-		res.send({ message });
-		return;
-	}
-	if (!confirmPassword) {
-		message = 'Please confirm your new password';
-		res.send({ message });
-		return;
-	}
-	if (!validator.isStrongPassword(newPassword)) {
-		message = 'Your new password is too weak';
-		res.send({ message });
-		return;
-	}
-
-	if (newPassword !== confirmPassword) {
-		message = 'Confirm Password is not the same';
-		res.send({ message });
-		return;
-	}
-
-	const userRes = await userModel.findOne({ email });
-	//password security check
-	const isSame = await bcrypt.compare(oldPassword, userRes.password);
-	if (!isSame) {
-		message = 'Wrong old password, please confirm your old password.';
-		res.send({ message });
-		return;
-	}
-
-	const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-
-	const update = { password: hashedPassword };
-
-	const filter = { email };
-
-	let updateUserModel = null;
-
-	try {
-		updateUserModel = await userModel.findOneAndUpdate(filter, update, {
-			new: true,
-		});
-
-		if (!updateUserModel) {
-			message = 'update user failed';
-			res.send({ message });
-			return;
-		}
-	} catch (e) {
-		message = e.message;
-	}
-	data = updateUserModel;
-	res.send({ data });
-});
 
 //get review by movieId 
 app.get('/reviews', async (req, res) => {
@@ -245,14 +181,58 @@ app.get('/reviews', async (req, res) => {
 });
 
 //------------xiaoming----------------------
-//update profile handle
+//edit profile handle
 app.post('/user/edit', async (req, res) => {
-	const { email, username } = req.body;
+	const { email, username, oldPassword, newPassword, confirmPassword } = req.body;
 	let message;
+	let success = "false";
+	if(!username){
+		message = 'Please enter your username';
+		res.send({ message , success});
+		return;
+	}
+	if (!oldPassword) {
+		message = 'Please enter your old password';
+		res.send({ message , success});
+		return;
+	}
+	if (!newPassword) {
+		message = 'Please set your new password';
+		res.send({ message , success});
+		return;
+	}
+	if (!confirmPassword) {
+		message = 'Please confirm your new password';
+		res.send({ message , success});
+		return;
+	}
+	if (!validator.isStrongPassword(newPassword)) {
+		message = 'Your new password is too weak';
+		res.send({ message , success});
+		return;
+	}
+
+	if (newPassword !== confirmPassword) {
+		message = 'Confirm Password is not the same';
+		res.send({ message , success});
+		return;
+	}
 
 	const userRes = await userModel.findOne({ email });
+	//password security check
+	const isSame = await bcrypt.compare(oldPassword, userRes.password);
+	if (!isSame) {
+		message = 'Wrong old password, please confirm your old password.';
+		res.send({ message , success});
+		return;
+	}
 
-	const update = { username: username};
+	const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+	const update = { 
+		username: username,
+		password: hashedPassword,
+	};
 
 	const filter = { email };
 
@@ -265,34 +245,46 @@ app.post('/user/edit', async (req, res) => {
 
 		if (!updateUserModel) {
 			message = 'update user failed';
-			res.send({ message });
+			res.send({ message , success});
 			return;
 		}
 	} catch (e) {
 		message = e.message;
 	}
+	success = "true";
 	data = updateUserModel;
-	res.send({ data });
+	res.send({ data, success });
 });
 
-// app.put('/user/change-profile', async (req, res) => {
-// 	const email = req.body.email;
-// 	const username = req.body.username;
-// 	const user = {
-// 		email: email,
-// 		username: username, 
-// 		password:password,
-// 		avatar: avatar,
-// 	};
-// 	console.log(user);
-// 	const results = await userModel.replaceOne(
-// 		{email: email},
-// 	user
-// 	);
-// 	console.log("matched:" + results.matchedCount);
-// 	console.log("modified:" + results.modifiedCount);
-// 	res.send(results);
-// 	});
+//update profile handle
+// app.post('/user/edit', async (req, res) => {
+// 	const { email, username } = req.body;
+// 	let message;
+
+// 	const userRes = await userModel.findOne({ email });
+
+// 	const update = { username: username};
+
+// 	const filter = { email };
+
+// 	let updateUserModel = null;
+
+// 	try {
+// 		updateUserModel = await userModel.findOneAndUpdate(filter, update, {
+// 			new: true,
+// 		});
+
+// 		if (!updateUserModel) {
+// 			message = 'update user failed';
+// 			res.send({ message });
+// 			return;
+// 		}
+// 	} catch (e) {
+// 		message = e.message;
+// 	}
+// 	data = updateUserModel;
+// 	res.send({ data });
+// });
 
 
 //-------zibin------------
