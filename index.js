@@ -283,29 +283,28 @@ app.post("/commandreviews/get", async (req, res) => {
 });
 
 /* delete review using recordId  */
-// app.delete("/commandreviews/:recordId", async (req, res) => {
-//   const recordId = req.params.recordId;
-//   try{
-// 	await CommentRecordModel.deleteOne({ _Id: recordId });
-//   // console.log(results);
-//   res.send({success:true});
-//   return;
-//   }catch(e){
-// 	console.log(e.message);
-
-//   }
-//   res.send({success:false});
-
-// });
 app.delete("/commandreviews/:recordId", async (req, res) => {
   const recordId = req.params.recordId;
-
-  const results = await CommentRecordModel.deleteOne({ _Id: recordId });
-
-  console.log(results);
-
-  res.send(results);
+  try {
+    await CommentRecordModel.deleteOne({ _Id: recordId });
+    // console.log(results);
+    res.send({ success: true });
+    return;
+  } catch (error) {
+    console.log(error.message);
+  }
+  res.send({ success: false });
 });
+
+// app.delete("/commandreviews/:recordId", async (req, res) => {
+//   const recordId = req.params.recordId;
+
+//   const results = await CommentRecordModel.deleteOne({ _Id: recordId });
+
+//   console.log(results);
+
+//   res.send(results);
+// });
 
 /* get review using URL path parameters 
 to /commandreviews/:recordId */
