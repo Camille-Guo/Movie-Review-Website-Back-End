@@ -42,7 +42,7 @@ app.use(express.json()); // Allows express to read a req body
 // Configuring body parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
+//----------------rucheng---------//
 //register handle
 app.post('/identity/register', async (req, res) => {
 	const { username, email, password, confirmPassword } = req.body;
@@ -244,6 +244,56 @@ app.get('/reviews', async (req, res) => {
     res.send(review);
 });
 
+//------------xiaoming----------------------
+//update profile handle
+app.post('/user/edit', async (req, res) => {
+	const { email, username } = req.body;
+	let message;
+
+	const userRes = await userModel.findOne({ email });
+
+	const update = { username: username};
+
+	const filter = { email };
+
+	let updateUserModel = null;
+
+	try {
+		updateUserModel = await userModel.findOneAndUpdate(filter, update, {
+			new: true,
+		});
+
+		if (!updateUserModel) {
+			message = 'update user failed';
+			res.send({ message });
+			return;
+		}
+	} catch (e) {
+		message = e.message;
+	}
+	data = updateUserModel;
+	res.send({ data });
+});
+
+// app.put('/user/change-profile', async (req, res) => {
+// 	const email = req.body.email;
+// 	const username = req.body.username;
+// 	const user = {
+// 		email: email,
+// 		username: username, 
+// 		password:password,
+// 		avatar: avatar,
+// 	};
+// 	console.log(user);
+// 	const results = await userModel.replaceOne(
+// 		{email: email},
+// 	user
+// 	);
+// 	console.log("matched:" + results.matchedCount);
+// 	console.log("modified:" + results.modifiedCount);
+// 	res.send(results);
+// 	});
+
 
 //-------zibin------------
 
@@ -294,12 +344,31 @@ app.post("/commandreviews/get", async (req, res) => {
 });
 
 /* delete review using recordId  */
+// app.delete("/commandreviews/:recordId", async (req, res) => {
+//   const recordId = req.params.recordId;
+//   try{
+// 	await CommentRecordModel.deleteOne({ _Id: recordId });
+//   // console.log(results);
+//   res.send({success:true});
+//   return;
+//   }catch(e){
+// 	console.log(e.message);
+
+//   }
+//   res.send({success:false});
+
+// });
 app.delete("/commandreviews/:recordId", async (req, res) => {
-  const recordId = req.params.recordId;
-  const results = await CommentRecordModel.deleteOne({ _Id: recordId });
-  // console.log(results);
-  res.send(results);
-});
+
+	const recordId = req.params.recordId;
+  
+	const results = await CommentRecordModel.deleteOne({ _Id: recordId });
+  
+	console.log(results);
+  
+	res.send(results);
+  
+  });
 
 /* get review using URL path parameters 
 to /commandreviews/:recordId */
@@ -335,16 +404,27 @@ app.put("/commandreviews", async (req, res) => {
     content: content,
   };
   console.log(review);
+  try{
   const results = await CommentRecordModel.replaceOne(
     {
       _id: recordId,
     },
     review
   );
+  	res.send({ success: true });
+  	return;
+	}catch (error) {
+
+    console.log(error.message);
+
+  }
+
+  res.send({ success: false });
+
+  
   // const res = await Person.replaceOne({ _id: 24601 }, { name: 'Jean Valjean' });
   console.log("matched: " + results.matchedCount);
   console.log("modified: " + results.modifiedCount);
-  res.send(results);
 });
 
 app.listen(port, () =>
