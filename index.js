@@ -237,6 +237,15 @@ app.post('/user/change-password', async (req, res) => {
 	res.send({ data });
 });
 
+//get review by movieId 
+app.get('/reviews', async (req, res) => {
+    const movieId = req.query.movieId;
+    const review = await CommentRecordModel.find({ movieId});
+    res.send(review);
+});
+
+
+//-------zibin------------
 
 //add review
 app.post("/addreview", async (request, response) => {
