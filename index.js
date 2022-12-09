@@ -8,23 +8,23 @@ const userModel = require("./userModels");
 const CommentRecordModel = require("./recordModels");
 
 //rucheng local database
-mongoose.connect(
-  "mongodb+srv://rrc:" +
-    process.env.MONGODB_PWD +
-    "@cluster0.rqltzmh.mongodb.net/monvie?retryWrites=true&w=majority",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+// mongoose.connect(
+//   "mongodb+srv://rrc:" +
+//     process.env.MONGODB_PWD +
+//     "@cluster0.rqltzmh.mongodb.net/monvie?retryWrites=true&w=majority",
+//   {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//   }
+// );
 
 //zibin local database connection
-// mongoose.connect(
-// 	"mongodb+srv://mongouser:" +
-// 	  process.env.MONGODB_PWD +
-// 	  "@cluster0.xy96opn.mongodb.net/myFirstDb?retryWrites=true&w=majority",
-// 	{ useNewUrlParser: true, useUnifiedTopology: true }
-//   );
+mongoose.connect(
+  "mongodb+srv://mongouser:" +
+    process.env.MONGODB_PWD +
+    "@cluster0.xy96opn.mongodb.net/myFirstDb?retryWrites=true&w=majority",
+  { useNewUrlParser: true, useUnifiedTopology: true }
+);
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error: "));
@@ -42,7 +42,7 @@ app.use(express.json()); // Allows express to read a req body
 // Configuring body parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
+//----------------rucheng---------//
 //register handle
 app.post("/identity/register", async (req, res) => {
   const { username, email, password, confirmPassword } = req.body;
@@ -50,8 +50,8 @@ app.post("/identity/register", async (req, res) => {
   let status = "failed",
     message = "";
 
-  if (!username) {
-    message = "Please enter username";
+  if (!email) {
+    message = "Please enter your email";
     res.send({ status, message });
     return;
   }
@@ -283,10 +283,27 @@ app.post("/commandreviews/get", async (req, res) => {
 });
 
 /* delete review using recordId  */
+// app.delete("/commandreviews/:recordId", async (req, res) => {
+//   const recordId = req.params.recordId;
+//   try{
+// 	await CommentRecordModel.deleteOne({ _Id: recordId });
+//   // console.log(results);
+//   res.send({success:true});
+//   return;
+//   }catch(e){
+// 	console.log(e.message);
+
+//   }
+//   res.send({success:false});
+
+// });
 app.delete("/commandreviews/:recordId", async (req, res) => {
   const recordId = req.params.recordId;
+
   const results = await CommentRecordModel.deleteOne({ _Id: recordId });
-  // console.log(results);
+
+  console.log(results);
+
   res.send(results);
 });
 
@@ -324,16 +341,24 @@ app.put("/commandreviews", async (req, res) => {
     content: content,
   };
   console.log(review);
-  const results = await CommentRecordModel.replaceOne(
-    {
-      _id: recordId,
-    },
-    review
-  );
+  try {
+    const results = await CommentRecordModel.replaceOne(
+      {
+        _id: recordId,
+      },
+      review
+    );
+    res.send({ success: true });
+    return;
+  } catch (error) {
+    console.log(error.message);
+  }
+
+  res.send({ success: false });
+
   // const res = await Person.replaceOne({ _id: 24601 }, { name: 'Jean Valjean' });
   console.log("matched: " + results.matchedCount);
   console.log("modified: " + results.modifiedCount);
-  res.send(results);
 });
 
 app.listen(port, () =>
